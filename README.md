@@ -39,11 +39,11 @@ The project demonstrates practical applications of SQL, including database desig
 
 ```text
 Hair-Salon-Management-System/
-│
 ├── schema.sql
 ├── seed.sql
 ├── queries.sql
 ├── views.sql
+├── schema.png
 └── README.md
 ```
 
@@ -54,8 +54,16 @@ Hair-Salon-Management-System/
 | `queries.sql` | Contains 10 SQL queries for operational analysis. |
 | `views.sql` | Creates 3 reporting views for appointments, service teams, and customer debts. |
 | `README.md` | Provides project documentation and execution instructions. |
+| `schema.png` | ER diagram image |
+
 
 ## 5. Database Design
+
+### Entity Relationship Diagram (ERD)
+
+The following ER diagram illustrates the database structure, including the six relational tables, their primary keys, foreign keys, and relationships.
+
+![Hair Salon Database ER Diagram](schema.png)
 
 The database consists of six relational tables.
 
