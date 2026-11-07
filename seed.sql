@@ -75,7 +75,7 @@ VALUES
 (10, 7, 7, '2024-12-15 14:00:00', 'Completed'),
 (11, 8, 6, '2026-01-10 10:00:00', 'Completed'),
 (12, 9, 4, '2025-07-20 13:00:00', 'Completed'),
-(13, 10, 5, '2025-03-15 09:00:00', 'Pending'),
+(13, 10, 5, '2025-03-15 09:00:00', 'Completed'),
 (14, 2, 2, '2025-01-25 10:00:00', 'Cancelled'),
 (15, 3, 3, '2025-02-25 14:00:00', 'Pending'),
 (16, 4, 4, '2025-10-05 11:00:00', 'Cancelled'),
@@ -85,7 +85,7 @@ VALUES
 (20, 10, 3, '2025-06-15 10:00:00', 'Pending');
 
 
--- 5. SERVICE RECORDS (14 records)
+-- 5. SERVICE RECORDS (15 records)
 INSERT INTO service_records
 (record_id, appointment_id, service_summary,
  product_note, cost)
@@ -130,7 +130,10 @@ VALUES
  'Professional shampoo', 250000),
 
 (14, 18, 'Men Haircut and Styling',
- 'Styling wax', 180000);
+ 'Styling wax', 180000),
+
+(15, 13, 'Men Haircut and Styling',
+ 'Styling wax', 200000);
 
 
 -- 6. PAYMENTS (15 records)
@@ -312,3 +315,50 @@ LEFT JOIN payments p
 ON sr.appointment_id = p.appointment_id
 GROUP BY sr.appointment_id, sr.cost
 HAVING debt > 0;
+
+
+-- 20. Check customers with appointment history but no payments
+SELECT c.customer_id,
+       c.full_name
+FROM customers c
+WHERE EXISTS (SELECT 1 FROM appointments a
+              WHERE a.customer_id = c.customer_id)
+  AND NOT EXISTS (SELECT 1
+                  FROM payments p
+                  JOIN appointments a
+                  ON p.appointment_id = a.appointment_id
+                  WHERE a.customer_id = c.customer_id);
+
+
+-- 21. Check appointments with more than one service record (expected: 0 rows)
+SELECT appointment_id,
+       COUNT(*) AS record_count
+FROM service_records
+GROUP BY appointment_id
+HAVING COUNT(*) > 1;
+
+
+-- ==========================================
+-- CONSTRAINT VIOLATION EXAMPLES
+-- (commented out so the whole file still runs)
+-- ==========================================
+
+-- UNIQUE: appointment 1 already has a service record
+-- INSERT INTO service_records (appointment_id, service_summary, cost)
+-- VALUES (1, 'Duplicate record', 100000);
+
+-- CHECK: cost must be >= 0
+-- INSERT INTO service_records (appointment_id, service_summary, cost)
+-- VALUES (15, 'Negative cost', -50000);
+
+-- CHECK: amount must be > 0
+-- INSERT INTO payments (appointment_id, amount, payment_date, method)
+-- VALUES (1, 0, '2025-01-06 10:00:00', 'Cash');
+
+-- ENUM: invalid payment method
+-- INSERT INTO payments (appointment_id, amount, payment_date, method)
+-- VALUES (1, 10000, '2025-01-06 10:00:00', 'Momo');
+
+-- FOREIGN KEY: customer 999 does not exist
+-- INSERT INTO appointments (customer_id, stylist_id, appointment_date, status)
+-- VALUES (999, 1, '2025-01-01 09:00:00', 'Pending');
